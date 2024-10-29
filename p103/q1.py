@@ -4,7 +4,6 @@
 실습내용: 클래스 활용
 '''
 
-# q1
 class nemo:
     def __init__(self, w = 0, h = 0):
         self.w = w
@@ -23,27 +22,16 @@ class nemo:
         self.h = h
 
     def area(self):
-        print('면적: ', self.w * self.h)
+        return self.w * self.h
 
     def perimeter(self):
-        print('둘레: ', 2 * (self.w + self.h))
+        return 2 * (self.w + self.h)
 
-n1 = nemo(5, 10)
-n1.area()
-n1.perimeter()
+# import한 곳에선 실행되지 않고 이 파일을 실행할 때만 실행될 수 있게하는 코드
+if __name__ == "__main__":
+    n1 = nemo(5, 10)
+    print(f'면적: {n1.area()}')
+    print(f'둘레: {n1.perimeter()}')
 
 
-# q2
-class square(nemo):
-    def __init__(self, m = 0):
-        self.m = m
 
-    def area(self):
-        print('면적: ', self.m * self.m)
-
-    def perimeter(self):
-        print('둘레: ', 4 * self.m)
-
-n2 = square(5)
-n2.area()
-n2.perimeter()

@@ -12,3 +12,4 @@ if loc == -1:
 else:
     print(str[:loc+1])
     print(str[loc+1:])
+

@@ -6,3 +6,5 @@
 
 exam, report = map(int, input("시험, 과제 점수 입력: ").split())
 print('A') if exam >= 90 or report >= 90 else print()
+
+

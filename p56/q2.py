@@ -8,12 +8,12 @@ for i in range(1, 1001):
     strr = str(i)
     size = len(strr)
     if size == 1:
-        print(i, ':', int(i))
+        print(i, '=', int(i))
     elif size == 2:
         sum = int(strr[0]) + int(strr[1])
-        print(i, ':', sum)
+        print(i, '=', sum)
     elif size == 3:
         sum = int(strr[0]) + int(strr[1]) + int(strr[2])
-        print(i, ':', sum)
+        print(i, '=', sum)
     else:
-        print(i, ":", 1)
+        print(i, "=", 1)

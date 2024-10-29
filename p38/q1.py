@@ -11,3 +11,11 @@ elif user % 2 == 0:
     print("짝수")
 else :
     print("홀수")
+
+
+# 24.10.18 중간대비 복습
+num = int(input("숫자 입력: "))
+if num % 2 == 0:
+    print("짝수")
+else:
+    print("홀수")

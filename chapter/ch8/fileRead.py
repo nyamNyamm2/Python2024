@@ -4,7 +4,7 @@
 실습내용: 파일 내용 전체 읽기
 '''
 
-filein = open("./contact.txt", "r", encoding="utf-8")
+filein = open("contact.txt", "r", encoding="utf-8")
 readall = filein.read()
 print(readall)
 filein.close()

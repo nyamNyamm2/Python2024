@@ -10,3 +10,13 @@ if cm < 0:
     print("잘못 입력하였습니다")
 elif cm > 0:
     print("%.0f인치" %(cm / 2.54))
+
+
+
+
+# 24.10.18 중간대비 복습
+user = float(input("cm 입력: "))
+if user < 0:
+    print("잘못 입력하셨습니다.")
+else:
+    print(f'{user / 2.54:.2f}인치')

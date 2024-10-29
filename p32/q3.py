@@ -9,3 +9,12 @@ day = min / (60 * 24) % (60 * 24)
 hour = (min / 60) % 24
 min = min % 60
 print("%d일 %d시간 %d분" %(day, hour, min))
+
+
+
+
+
+
+# 24.10.18 중간대비 복습
+m = int(input("분을 입력: "))
+print(f'{m}분은 {int(m/ (60 * 24))}일 {int((m/60)%24)}시간 {m%60}분 입니다.')

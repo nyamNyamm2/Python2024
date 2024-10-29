@@ -4,7 +4,7 @@
 실습내용: 파일 내용 매개변수의 글자만큼 읽기
 '''
 
-filein = open("./contact.txt", "r", encoding="utf-8")
+filein = open("contact.txt", "r", encoding="utf-8")
 readall = filein.read(8)
 print(readall)
 filein.close()

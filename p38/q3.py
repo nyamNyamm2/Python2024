@@ -13,3 +13,6 @@ elif score >= 70:
         print("입학금면제 장학금")
         if score >= 90:
             print("등록금면제 장학금")
+
+
+
