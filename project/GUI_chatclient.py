@@ -97,12 +97,23 @@ class ChatClient:
         '''
         Server로부터 message를 수신하고 문서창에 표시한다
         '''
+        # 빨간색 텍스트 스타일 정의
+        self.chat_transcript_area.tag_configure("disconnect", foreground="red")
+
         while True:
             try:
                 buf = so.recv(BUFFER_SIZE)
                 if not buf:
                     break
-                self.chat_transcript_area.insert('end', buf.decode('utf-8') + '\n')
+
+                message = buf.decode('utf-8')
+                if "연결을 종료함." in message:
+                    # 연결 종료 메시지를 빨간색으로 표시
+                    self.chat_transcript_area.insert('end', message + '\n', "disconnect")
+                else:
+                    # 일반 메시지
+                    self.chat_transcript_area.insert('end', message + '\n')
+
                 self.chat_transcript_area.yview(END)
             except ConnectionAbortedError:
                 # 연결이 끊어진 경우, 연결 종료 메시지를 출력하고 종료
@@ -124,19 +135,63 @@ class ChatClient:
         self.client_socket.close()
         self.root.quit()
 
+def initialize_connect_gui():
+    '''
+    IP와 포트 입력을 위한 초기 GUI
+    '''
+    def connect_to_server():
+        nonlocal ip, port
+        ip = ip_entry.get().strip()  # IP 입력값
+        port = port_entry.get().strip()  # 포트 입력값
+        if not port.isdigit():  # 포트 번호가 숫자인지 확인
+            messagebox.showerror("입력 오류", "포트 번호는 숫자로 입력해야 합니다.")
+            return
+        port = int(port)  # 문자열을 정수로 변환
+        connect_root.destroy()  # 창 닫기
+
+    connect_root = Tk()
+    connect_root.title("서버 연결 설정")
+
+    Label(connect_root, text="서버 IP 주소").grid(row=0, column=0, padx=10, pady=10)
+    Label(connect_root, text="포트 번호").grid(row=1, column=0, padx=10, pady=10)
+
+    ip_entry = Entry(connect_root, width=20)
+    port_entry = Entry(connect_root, width=20)
+
+    ip_entry.grid(row=0, column=1, padx=10, pady=10)
+    port_entry.grid(row=1, column=1, padx=10, pady=10)
+
+    Button(connect_root, text="연결", command=connect_to_server).grid(row=2, column=0, columnspan=2, pady=10)
+
+    # 기본값 설정
+    ip_entry.insert(0, "127.0.0.1")
+    port_entry.insert(0, "2500")
+
+    # GUI 메인 루프 실행
+    ip, port = None, None  # 기본값 설정
+    connect_root.mainloop()
+
+    return ip, port  # IP와 포트 값 반환
+
 
 if __name__ == "__main__":
-    # ip 매핑
-    host = input("서버 IP주소(default=127.0.0.1): ").strip()
-    if host == '':
-        host = '127.0.0.1'
+    # # ip 매핑
+    # host = input("서버 IP주소(default=127.0.0.1): ").strip()
+    # if host == '':
+    #     host = '127.0.0.1'
+    #
+    # # 포트 번호 입력
+    # port = input("포트 번호(default: 2500): ").strip()
+    # if port == '':
+    #     port = 2500
+    # else:
+    #     port = int(port)
+    #
+    # ChatClient(host, port)
+    # mainloop()
+    ip, port = initialize_connect_gui()
+    if ip and port:  # IP와 포트가 정상적으로 입력된 경우
+        print(f"서버 연결 정보: IP={ip}, PORT={port}")
+        ChatClient(ip, port)  # 채팅 클라이언트 실행
+        mainloop()
 
-    # 포트 번호 입력
-    port = input("포트 번호(default: 2500): ").strip()
-    if port == '':
-        port = 2500
-    else:
-        port = int(port)
-
-    ChatClient(host, port)
-    mainloop()

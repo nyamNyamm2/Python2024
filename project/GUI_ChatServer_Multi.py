@@ -64,6 +64,6 @@ class MultiChatServer:
                    self.clients.remove(client)                              # 소켓 제거
                    print(f"({ip}, {port}) 연결이 종료되었습니다")
         
-            
+
 if __name__ == "__main__":
     MultiChatServer(PORT_NUM)
