@@ -23,7 +23,7 @@ class MultiChatServer:
         self.port = port
         self.s_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.s_sock.bind((self.ip, self.port))
-        print("* * * * * 서버 활성화 * * * * *\n* * * 클라이언트 연결 허용 * * *\n\n")
+        print("\n* * * * * 서버 활성화 * * * * *\n\n* * * 클라이언트 연결 허용 * * *\n\n")
         self.s_sock.listen(100)
         self.accept_client()
         

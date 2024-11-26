@@ -40,7 +40,15 @@ class ChatClient:
         '''
         message를 전송하는 callback 함수
         '''
-        senders_name = self.name_widget.get().strip() + ":"
+        senders_name = self.name_widget.get().strip()
+
+        # 사용자 이름 유효성 검사
+        if not senders_name:
+            messagebox.showwarning("이름 미입력", "사용자 이름을 설정하세요.")
+            return 'break'
+
+        senders_name += ':'
+
         data = self.enter_text_widget.get(1.0, 'end').strip()
         message = (senders_name + data).encode('utf-8')
         self.chat_transcript_area.insert('end', message.decode('utf-8') + '\n')
