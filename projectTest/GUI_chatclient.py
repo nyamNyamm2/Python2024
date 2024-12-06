@@ -7,6 +7,7 @@ from threading import *
 
 BUFFER_SIZE = 1024
 
+
 class ChatClient:
     client_socket = None
 
@@ -64,13 +65,16 @@ class ChatClient:
             fr[i].pack(fill=BOTH)
 
         # 사용자 이름 레이블
-        self.name_label = Label(fr[0], text=f"사용자 이름: {self.username}",  fg="blue")
+        self.name_label = Label(fr[0], text=f"사용자 이름: {self.username}", fg="blue")
         self.recv_label = Label(fr[1], text="수신 메시지:")
         self.send_label = Label(fr[3], text="송신 메시지:")
         self.send_btn = Button(fr[3], text="전송", command=self.send_chat)
         self.chat_transcript_area = ScrolledText(fr[2], height=20, width=60)
         self.enter_text_widget = ScrolledText(fr[4], height=5, width=60)
         self.quit_btn = Button(fr[4], text="종료", command=self.close_connection)
+
+        # CtoF 버튼 추가
+        self.ctof_btn = Button(fr[4], text="CtoF", command=self.show_ctof_window)
 
         # 사용자 이름 표시 (수정 불가능)
         self.name_label.pack(side=LEFT, padx=10, pady=10)
@@ -84,6 +88,7 @@ class ChatClient:
         # 버튼 배치
         self.send_btn.pack(side=RIGHT, padx=20)
         self.quit_btn.pack(side=RIGHT, padx=20, pady=5)
+        self.ctof_btn.pack(side=RIGHT, padx=20, pady=5)
 
     def listen_thread(self):
         '''
@@ -98,7 +103,7 @@ class ChatClient:
         '''
         # 빨간색 텍스트 스타일 정의
         self.chat_transcript_area.tag_configure("disconnect", foreground="red")
-
+        self.chat_transcript_area.tag_configure("convert", foreground="blue")
         while True:
             try:
                 buf = so.recv(BUFFER_SIZE)
@@ -106,29 +111,58 @@ class ChatClient:
                     break
 
                 message = buf.decode('utf-8')
-                if "연결을 종료함." in message:
+                if "(이)가 연결을 종료함." in message:
                     # 연결 종료 메시지를 빨간색으로 표시
                     self.chat_transcript_area.insert('end', message + '\n', "disconnect")
+                elif "°F" in message:
+                    self.chat_transcript_area.insert('end', message + '\n', "convert")
                 else:
                     # 일반 메시지
                     self.chat_transcript_area.insert('end', message + '\n')
 
                 self.chat_transcript_area.yview(END)
-            except ConnectionAbortedError:
-                # 연결이 끊어진 경우, 연결 종료 메시지를 출력하고 종료
-                print("연결이 종료되었습니다.")
-                break
             except Exception as e:
-                # 기타 예외 처리
                 print(f"예외 발생: {e}")
                 break
         so.close()
+
+    def show_ctof_window(self):
+        '''
+        섭씨를 화씨로 변환하는 윈도우를 띄운다
+        '''
+        self.ctof_window = Toplevel(self.root)
+        self.ctof_window.title("섭씨 -> 화씨 변환")
+
+        label = Label(self.ctof_window, text="섭씨 온도를 입력하세요:")
+        label.pack(padx=10, pady=5)
+
+        self.celsius_entry = Entry(self.ctof_window)
+        self.celsius_entry.pack(padx=10, pady=5)
+
+        convert_btn = Button(self.ctof_window, text="변환", command=self.convert_to_fahrenheit)
+        convert_btn.pack(padx=10, pady=5)
+
+        self.result_label = Label(self.ctof_window, text="화씨 온도:")
+        self.result_label.pack(padx=10, pady=5)
+
+    def convert_to_fahrenheit(self):
+        '''
+        섭씨 온도를 화씨로 변환하여 서버로 전송
+        '''
+        try:
+            celsius = float(self.celsius_entry.get())
+            fahrenheit = (celsius * 9 / 5) + 32
+            self.client_socket.send(f"CTOF:{fahrenheit}".encode('utf-8'))
+            self.result_label.config(text=f"화씨 온도: {fahrenheit:.2f}°F")
+        except ValueError:
+            messagebox.showerror("잘못된 입력", "숫자를 입력해주세요.")
 
     def close_connection(self):
         '''
         연결 종료 메시지를 서버로 보내고 클라이언트 종료
         '''
-        msg = f'사용자 {self.username}가 연결을 종료함.'
+        msg = f'사용자 {self.username}(이)가 연결을 종료함.'
         self.client_socket.send(msg.encode('utf-8'))
         self.client_socket.close()
         self.root.quit()
+

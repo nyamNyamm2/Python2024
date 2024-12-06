@@ -51,7 +51,7 @@ def initialize_connect_gui():
     # 기본값 설정
     ip_entry.insert(0, "127.0.0.1")
     port_entry.insert(0, "2500")
-    name_entry.insert(0, "사용자")
+    name_entry.insert(0, "손님")
 
     # 연결 버튼
     Button(connect_root, text="연결", command=connect_to_server).grid(row=3, column=0, columnspan=2, pady=10)
@@ -61,6 +61,7 @@ def initialize_connect_gui():
     connect_root.mainloop()
 
     return ip, port, username  # 입력값을 반환
+
 
 
 if __name__ == "__main__":
