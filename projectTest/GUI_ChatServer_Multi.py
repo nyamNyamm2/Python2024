@@ -40,6 +40,8 @@ class MultiChatServer:
                 message = incoming_message.decode('utf-8')
                 if message.startswith("CTOF:"):
                     self.handle_ctof_request(c_socket, message)
+                elif "님이 야구게임" in message:  # 게임 성공 메시지 처리
+                    self.send_all_clients(c_socket, message)  # 모든 클라이언트에게 게임 성공 메시지 전송
                 else:
                     self.send_all_clients(c_socket, message)
         c_socket.close()

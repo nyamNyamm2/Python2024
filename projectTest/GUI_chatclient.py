@@ -1,9 +1,9 @@
-# chat_client.py
 from socket import *
 from tkinter import *
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 from threading import *
+import random
 
 BUFFER_SIZE = 1024
 
@@ -16,6 +16,8 @@ class ChatClient:
         self.initialize_socket(ip, port)
         self.initialize_gui()
         self.listen_thread()
+        self.secret_number = self.generate_secret_number()  # 게임 시작 시 비밀 번호 생성
+        self.guess_attempts = 0  # 추측 횟수 초기화
 
     def initialize_socket(self, ip, port):
         '''
@@ -76,6 +78,9 @@ class ChatClient:
         # CtoF 버튼 추가
         self.ctof_btn = Button(fr[4], text="CtoF", command=self.show_ctof_window)
 
+        # 숫자 야구 버튼 추가
+        self.number_baseball_btn = Button(fr[4], text="숫자 야구", command=self.start_number_baseball_game)
+
         # 사용자 이름 표시 (수정 불가능)
         self.name_label.pack(side=LEFT, padx=10, pady=10)
 
@@ -89,6 +94,7 @@ class ChatClient:
         self.send_btn.pack(side=RIGHT, padx=20)
         self.quit_btn.pack(side=RIGHT, padx=20, pady=5)
         self.ctof_btn.pack(side=RIGHT, padx=20, pady=5)
+        self.number_baseball_btn.pack(side=RIGHT, padx=20, pady=5)
 
     def listen_thread(self):
         '''
@@ -115,6 +121,8 @@ class ChatClient:
                     # 연결 종료 메시지를 빨간색으로 표시
                     self.chat_transcript_area.insert('end', message + '\n', "disconnect")
                 elif "°F" in message:
+                    self.chat_transcript_area.insert('end', message + '\n', "convert")
+                elif "님이 야구게임" and "번 만에 성공하였습니다." in message:
                     self.chat_transcript_area.insert('end', message + '\n', "convert")
                 else:
                     # 일반 메시지
@@ -166,3 +174,50 @@ class ChatClient:
         self.client_socket.close()
         self.root.quit()
 
+    def generate_secret_number(self):
+        '''비밀 번호 생성 (1~9 사이의 중복 없는 숫자 3개)'''
+        return random.sample(range(1, 10), 3)
+
+    def start_number_baseball_game(self):
+        '''숫자 야구 게임을 위한 새 창 띄우기'''
+        self.baseball_window = Toplevel(self.root)
+        self.baseball_window.title("숫자 야구 게임")
+
+        self.guess_label = Label(self.baseball_window, text="숫자 3자리를 추측하세요 (1~9 중 중복되지 않음):")
+        self.guess_label.pack(padx=10, pady=5)
+
+        self.guess_entry = Entry(self.baseball_window)
+        self.guess_entry.pack(padx=10, pady=5)
+
+        self.guess_btn = Button(self.baseball_window, text="추측", command=self.check_guess)
+        self.guess_btn.pack(padx=10, pady=5)
+
+        self.result_label = Label(self.baseball_window, text="")
+        self.result_label.pack(padx=10, pady=5)
+
+        self.quit_game_btn = Button(self.baseball_window, text="게임 종료", command=self.close_game)
+        self.quit_game_btn.pack(padx=10, pady=5)
+
+    def check_guess(self):
+        '''사용자가 추측한 숫자와 비밀 번호를 비교'''
+        guess = self.guess_entry.get()
+        if len(guess) != 3 or not guess.isdigit() or len(set(guess)) != 3:
+            self.result_label.config(text="잘못된 입력! 숫자는 3자리여야 하며 중복되지 않아야 합니다.")
+            return
+
+        self.guess_attempts += 1
+        guess = list(map(int, guess))
+
+        strikes = sum(1 for i in range(3) if guess[i] == self.secret_number[i])
+        balls = sum(1 for i in range(3) if guess[i] in self.secret_number and guess[i] != self.secret_number[i])
+
+        if strikes == 3:
+            success_message = f"{self.username}님이 야구게임 {self.guess_attempts}번 만에 성공하였습니다."
+            self.client_socket.send(success_message.encode('utf-8'))
+            self.result_label.config(text=f"축하합니다! {self.guess_attempts}번 만에 맞추셨습니다.")
+        else:
+            self.result_label.config(text=f"{strikes} 스트라이크, {balls} 볼")
+
+    def close_game(self):
+        '''게임 창 종료'''
+        self.baseball_window.destroy()
