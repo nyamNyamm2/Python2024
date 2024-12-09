@@ -1,3 +1,9 @@
+'''
+완성일: 2024.12.09
+실습자: 201910852 심기윤
+프로젝트 내용: TCP 소켓 통신을 이용한 숫자야구 게임 서버
+'''
+
 import socket
 import threading
 import random
