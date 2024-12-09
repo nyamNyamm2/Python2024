@@ -32,7 +32,9 @@ def handle_client(client_socket, address):
                 usernames[address] = username
                 clients.append((client_socket, address))
                 broadcast(f"{username}님이 게임에 접속했습니다!\n")
-                send_client_list()  # 접속자 목록 전송
+
+                # 업데이트된 접속자 목록을 모든 클라이언트에게 전송
+                send_client_list()
 
             elif message.startswith("START_GAME"):
                 if not game_state["active"]:
@@ -67,8 +69,8 @@ def handle_client(client_socket, address):
 
     client_socket.close()
     clients.remove((client_socket, address))
-    del usernames[address]
     broadcast(f"{usernames.get(address, address)}님이 연결을 종료했습니다.\n")
+    del usernames[address]
     send_client_list()  # 접속자 목록 갱신
 
 def broadcast(message, sender_socket=None):
@@ -80,9 +82,16 @@ def broadcast(message, sender_socket=None):
                 pass
 
 def send_client_list():
+    # 현재 접속 중인 사용자 이름 목록 생성
     client_list = [usernames[addr] for _, addr in clients]
     user_list_message = "접속자 목록:" + ", ".join(client_list)
-    broadcast(user_list_message)
+
+    # 모든 클라이언트에게 전송
+    for client, _ in clients:
+        try:
+            client.send(user_list_message.encode())
+        except:
+            pass
 
 def reset_game():
     global game_state
