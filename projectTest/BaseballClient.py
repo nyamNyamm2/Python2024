@@ -8,10 +8,17 @@ def receive_messages():
     while True:
         try:
             message = client_socket.recv(1024).decode()
-            chat_area.config(state=tk.NORMAL)
-            chat_area.insert(tk.END, message + '\n')
-            chat_area.config(state=tk.DISABLED)
-            chat_area.see(tk.END)
+            if message.startswith("접속자 목록:"):
+                users = message.replace("접속자 목록:", "").strip()
+                user_list.config(state=tk.NORMAL)
+                user_list.delete(1.0, tk.END)
+                user_list.insert(tk.END, users + '\n')
+                user_list.config(state=tk.DISABLED)
+            else:
+                chat_area.config(state=tk.NORMAL)
+                chat_area.insert(tk.END, message + '\n', 'chat')
+                chat_area.config(state=tk.DISABLED)
+                chat_area.see(tk.END)
         except:
             print("오류가 발생했습니다. 종료합니다...")
             client_socket.close()
@@ -22,7 +29,7 @@ def send_message(event=None):
     input_area.delete(0, tk.END)
     client_socket.send(message.encode())
     chat_area.config(state=tk.NORMAL)
-    chat_area.insert(tk.END, f"나: {message}\n")
+    chat_area.insert(tk.END, f"나: {message}\n", 'chat')
     chat_area.config(state=tk.DISABLED)
     chat_area.see(tk.END)
     if message == "EXIT":
@@ -88,34 +95,44 @@ connection_window.mainloop()
 app = tk.Tk()
 app.title("숫자 야구 게임")
 
+# Layout setup
+main_frame = tk.Frame(app)
+main_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
 # Chat area
-chat_frame = tk.Frame(app)
-chat_area = scrolledtext.ScrolledText(chat_frame, wrap=tk.WORD, state=tk.DISABLED, height=15, width=50)
-chat_area.pack(padx=10, pady=10)
-chat_frame.pack(padx=10, pady=10)
+chat_frame = tk.Frame(main_frame)
+chat_area = scrolledtext.ScrolledText(chat_frame, wrap=tk.WORD, state=tk.DISABLED, height=20, width=50)
+chat_area.tag_config('chat', foreground='blue')
+chat_area.pack(padx=10, pady=(10, 0))
 
-# Input area
-input_frame = tk.Frame(app)
-input_area = tk.Entry(input_frame, width=50)
-input_area.pack(side=tk.LEFT, padx=10)
+input_area = tk.Entry(chat_frame, width=50)
+input_area.pack(padx=10, pady=(0, 10))
 input_area.bind("<Return>", send_message)
-input_frame.pack(padx=10, pady=10)
+chat_frame.pack(side=tk.LEFT, fill=tk.Y)
 
-# Game area
-game_frame = tk.Frame(app)
-start_button = tk.Button(game_frame, text="게임 시작", command=start_game)
-start_button.pack(pady=5)
+# User list area
+game_frame = tk.Frame(main_frame)
 
+status_label = tk.Label(game_frame, text="접속한 사용자:", font=("Arial", 12, "bold"))
+status_label.pack(pady=(10, 5))
+
+user_list = scrolledtext.ScrolledText(game_frame, wrap=tk.WORD, state=tk.DISABLED, height=10, width=40)
+user_list.pack(padx=10, pady=(0, 10))
+
+# Guessing game area
 guess_label = tk.Label(game_frame, text="숫자를 입력하세요:")
 guess_label.pack()
 
-guess_input = tk.Entry(game_frame)
+guess_input = tk.Entry(game_frame, width=30)
 guess_input.pack(pady=5)
 
 submit_guess_button = tk.Button(game_frame, text="추측 제출", command=send_guess)
 submit_guess_button.pack(pady=5)
 
-game_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+start_button = tk.Button(game_frame, text="게임 시작", command=start_game)
+start_button.pack(pady=5)
+
+game_frame.pack(side=tk.RIGHT, fill=tk.Y)
 
 # Start receiving thread
 receive_thread = threading.Thread(target=receive_messages)
