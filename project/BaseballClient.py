@@ -23,10 +23,16 @@ def receive_messages():
             # 체팅과 사용자 목록 구분
             if message.startswith("접속자 목록:"):
                 users = message.replace("접속자 목록:", "").strip()
-                user_list.config(state=tk.NORMAL)           # (ScrolledText) 위젯 수정 가능
-                user_list.delete(1.0, tk.END)         # 1행 0열부터 끝까지
-                user_list.insert(tk.END, users + '\n')      # 위젯 끝네 users 문자열 삽입
-                user_list.config(state=tk.DISABLED)         # 위젯 수정 불가
+                userList = users.split(",")  # 접속자 목록을 리스트로 분리
+
+                user_list.config(state=tk.NORMAL)  # (ScrolledText) 위젯 수정 가능
+                user_list.delete(1.0, tk.END)  # 기존 내용 삭제
+
+                # userList의 각 항목을 한 줄씩 추가
+                for user in userList:
+                    user_list.insert(tk.END, user.strip() + '\n')  # 항목마다 한 줄씩 추가
+
+                user_list.config(state=tk.DISABLED)  # 위젯 수정 불가
             else:
                 chat_area.config(state=tk.NORMAL)           # 위젯 수정 가능
 
@@ -161,7 +167,7 @@ chat_frame.pack(side=tk.LEFT, fill=tk.Y)
 game_frame = tk.Frame(main_frame)
 status_label = tk.Label(game_frame, text="접속한 사용자", font=("Arial", 12, "bold"))
 status_label.pack(pady=(10, 5))
-user_list = scrolledtext.ScrolledText(game_frame, wrap=tk.WORD, state=tk.DISABLED, height=10, width=40)
+user_list = scrolledtext.ScrolledText(game_frame, wrap=tk.WORD, state=tk.DISABLED, height=10, width=35)
 user_list.pack(padx=10, pady=(0, 10))
 
 # 숫자 추측 게임 영역
