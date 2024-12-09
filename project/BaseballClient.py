@@ -23,18 +23,18 @@ def receive_messages():
             # 체팅과 사용자 목록 구분
             if message.startswith("접속자 목록:"):
                 users = message.replace("접속자 목록:", "").strip()
-                userList = users.split(",")  # 접속자 목록을 리스트로 분리
+                userList = users.split(",")                         # 접속자 목록을 리스트로 분리
 
-                user_list.config(state=tk.NORMAL)  # (ScrolledText) 위젯 수정 가능
-                user_list.delete(1.0, tk.END)  # 기존 내용 삭제
+                user_list.config(state=tk.NORMAL)                   # (ScrolledText) 위젯 수정 가능
+                user_list.delete(1.0, tk.END)               # 기존 내용 삭제
 
                 # userList의 각 항목을 한 줄씩 추가
                 for user in userList:
-                    user_list.insert(tk.END, user.strip() + '\n')  # 항목마다 한 줄씩 추가
+                    user_list.insert(tk.END, user.strip() + '\n')   # 항목마다 한 줄씩 추가
 
-                user_list.config(state=tk.DISABLED)  # 위젯 수정 불가
+                user_list.config(state=tk.DISABLED)                 # 위젯 수정 불가
             else:
-                chat_area.config(state=tk.NORMAL)           # 위젯 수정 가능
+                chat_area.config(state=tk.NORMAL)                   # 위젯 수정 가능
 
                 # 메시지 내용에 따라 다른 색상으로 출력
                 if message.startswith("게임이 시작되었습니다") or message.startswith("다음 턴:") or "님이" in message or "게임 종료" in message:
