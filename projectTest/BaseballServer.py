@@ -12,7 +12,7 @@ game_state = {
 }
 
 def generate_random_answer():
-    return "".join(random.sample("0123456789", 3))
+    return "".join(random.sample("123456789", 3))
 
 def calculate_strike_and_ball(answer, guess):
     strikes = sum(1 for a, g in zip(answer, guess) if a == g)

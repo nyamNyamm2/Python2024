@@ -2,7 +2,7 @@ import socket
 import threading
 import tkinter as tk
 from tkinter import scrolledtext
-from tkinter import simpledialog
+from tkinter import messagebox
 
 def receive_messages():
     while True:
@@ -21,6 +21,10 @@ def send_message(event=None):
     message = input_area.get()
     input_area.delete(0, tk.END)
     client_socket.send(message.encode())
+    chat_area.config(state=tk.NORMAL)
+    chat_area.insert(tk.END, f"나: {message}\n")
+    chat_area.config(state=tk.DISABLED)
+    chat_area.see(tk.END)
     if message == "EXIT":
         client_socket.close()
         app.quit()
@@ -33,19 +37,54 @@ def send_guess():
     guess_input.delete(0, tk.END)
     client_socket.send(f"GUESS:{guess}".encode())
 
-# Connect to server
-connection_dialog = tk.Tk()
-connection_dialog.withdraw()
+def connect_to_server():
+    global client_socket
+    host = host_input.get()
+    port = port_input.get()
+    username = username_input.get()
 
-HOST = simpledialog.askstring("연결 설정", "서버 IP를 입력하세요:")
-PORT = simpledialog.askinteger("연결 설정", "서버 포트를 입력하세요:")
-USERNAME = simpledialog.askstring("사용자 이름", "사용자 이름을 입력하세요:")
+    if not host or not port or not username:
+        messagebox.showerror("입력 오류", "모든 필드를 채워주세요.")
+        return
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
-client_socket.send(f"USERNAME:{USERNAME}".encode())
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((host, int(port)))
+        client_socket.send(f"USERNAME:{username}".encode())
+        connection_window.destroy()
+    except Exception as e:
+        messagebox.showerror("연결 오류", f"서버에 연결할 수 없습니다: {e}")
 
-# GUI setup
+# Initial connection setup window
+connection_window = tk.Tk()
+connection_window.title("서버 연결 설정")
+
+connection_frame = tk.Frame(connection_window)
+
+host_label = tk.Label(connection_frame, text="서버 IP:")
+host_label.grid(row=0, column=0, padx=5, pady=5)
+host_input = tk.Entry(connection_frame, width=30)
+host_input.insert(0, "127.0.0.1")
+host_input.grid(row=0, column=1, padx=5, pady=5)
+
+port_label = tk.Label(connection_frame, text="서버 포트:")
+port_label.grid(row=1, column=0, padx=5, pady=5)
+port_input = tk.Entry(connection_frame, width=30)
+port_input.insert(0, "12345")
+port_input.grid(row=1, column=1, padx=5, pady=5)
+
+username_label = tk.Label(connection_frame, text="사용자 이름:")
+username_label.grid(row=2, column=0, padx=5, pady=5)
+username_input = tk.Entry(connection_frame, width=30)
+username_input.grid(row=2, column=1, padx=5, pady=5)
+
+connect_button = tk.Button(connection_frame, text="연결", command=connect_to_server)
+connect_button.grid(row=3, column=0, columnspan=2, pady=10)
+
+connection_frame.pack(padx=10, pady=10)
+connection_window.mainloop()
+
+# Main chat and game window
 app = tk.Tk()
 app.title("숫자 야구 게임")
 
@@ -53,18 +92,14 @@ app.title("숫자 야구 게임")
 chat_frame = tk.Frame(app)
 chat_area = scrolledtext.ScrolledText(chat_frame, wrap=tk.WORD, state=tk.DISABLED, height=15, width=50)
 chat_area.pack(padx=10, pady=10)
-chat_frame.pack(side=tk.LEFT, padx=10, pady=10)
+chat_frame.pack(padx=10, pady=10)
 
 # Input area
 input_frame = tk.Frame(app)
-input_area = tk.Entry(input_frame, width=40)
+input_area = tk.Entry(input_frame, width=50)
 input_area.pack(side=tk.LEFT, padx=10)
 input_area.bind("<Return>", send_message)
-
-send_button = tk.Button(input_frame, text="전송", command=send_message)
-send_button.pack(side=tk.RIGHT, padx=10)
-
-input_frame.pack(side=tk.LEFT, padx=10, pady=10)
+input_frame.pack(padx=10, pady=10)
 
 # Game area
 game_frame = tk.Frame(app)
